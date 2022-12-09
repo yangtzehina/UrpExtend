@@ -1,0 +1,6 @@
+#ifndef YANGTZE_SHADOWEXTEND
+#define YANGTZE_SHADOWEXTEND
+
+
+
+#endif
