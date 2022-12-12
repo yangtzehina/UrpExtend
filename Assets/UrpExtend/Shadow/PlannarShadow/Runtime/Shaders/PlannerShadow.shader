@@ -2,6 +2,8 @@ Shader "ShadowExtend/PlannerShadow"
 {
     SubShader
     {
+        Tags { "RenderPipeline"="UniversalPipeline" "Queue"="Geometry" }
+
         Pass
         {
             Name "PlannarShadow"
@@ -26,36 +28,29 @@ Shader "ShadowExtend/PlannerShadow"
             #pragma vertex vert
             #pragma fragment frag
             
-            #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Lighting.hlsl"
-            #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Shadows.hlsl"
-            #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Lighting.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
-            CBUFFER_START(UnityPerMaterial)
-            float4 _Color;
-            float4 _planerLightDir;
-            float _Height;
-            CBUFFER_END
-
-            struct appdata
+            struct Attributes 
             {
-                float4 vertex : POSITION;
+                float4 positionOS : POSITION;
             };
 
-            struct v2f
+            struct Varyings 
             {
-                float4 vertex : SV_POSITION;
+                float4 positionCS : SV_POSITION;
                 float4 color : COLOR;
             };
 
-            v2f vert (appdata v)
+            Varyings vert (Attributes IN)
             {
-                v2f o;
+                Varyings  OUT;
                 //得到阴影的世界空间坐标
-		        float3 shadowPos = ShadowProjectPos(v.vertex);
+		        float3 shadowPos = ShadowProjectPos(IN.positionOS);
 
 		        //转换到裁切空间
-		        o.vertex = TransformWorldToHClip(shadowPos);
+		        OUT.vertex = TransformWorldToHClip(shadowPos);
 
 		        //得到中心点世界坐标
 		        float3 center =float3( unity_ObjectToWorld[0].w , _LightDir.w , unity_ObjectToWorld[2].w);
@@ -63,15 +58,15 @@ Shader "ShadowExtend/PlannerShadow"
 		        float falloff = 1-saturate(distance(shadowPos , center) * _ShadowFalloff);
 
 		        //阴影颜色
-		        o.color = _ShadowColor; 
-		        o.color.a *= falloff;
+		        OUT.color = _ShadowColor; 
+		        OUT.color.a *= falloff;
                 
-                return o;
+                return OUT;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            half4 frag (Varyings  input) : SV_Target
             {
-                return i.color;
+                return input.color;
             }
 
             float3 ShadowProjectPos(float4 vertPos)
