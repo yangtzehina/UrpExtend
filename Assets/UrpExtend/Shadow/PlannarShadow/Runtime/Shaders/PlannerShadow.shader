@@ -1,8 +1,12 @@
 Shader "ShadowExtend/PlannerShadow"
 {
-    SubShader
+	Properties
+	{
+		
+	}
+	SubShader
     {
-        Tags { "RenderPipeline"="UniversalPipeline" "Queue"="Geometry" }
+        Tags { "RenderPipeline"="UniversalPipeline" "Queue"="Transparent" }
 
         Pass
         {
@@ -28,9 +32,8 @@ Shader "ShadowExtend/PlannerShadow"
             #pragma vertex vert
             #pragma fragment frag
             
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-
+            
             struct Attributes 
             {
                 float4 positionOS : POSITION;
@@ -71,10 +74,10 @@ Shader "ShadowExtend/PlannerShadow"
 		        //得到中心点世界坐标
 		        float3 center =float3( unity_ObjectToWorld[0].w , 0 , unity_ObjectToWorld[2].w);
 		        //计算阴影衰减
-		        float falloff = 1-saturate(distance(shadowPos , center) * _ShadowFalloff);
+		        float falloff = 1-saturate(distance(shadowPos , center) * 1);
 
 		        //阴影颜色
-		        OUT.color = _ShadowColor; 
+		        OUT.color = unity_ShadowColor; 
 		        OUT.color.a *= falloff;
                 
                 return OUT;
