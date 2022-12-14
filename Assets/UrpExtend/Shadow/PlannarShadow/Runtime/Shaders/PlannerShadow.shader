@@ -2,11 +2,13 @@ Shader "ShadowExtend/PlannerShadow"
 {
 	Properties
 	{
-		
+		_GroundHeight("_GroundHeight", Float) = 0
+        _ShadowColor("_ShadowColor", Color) = (0,0,0,1)
+		_ShadowFalloff("_ShadowFalloff", Range(0,1)) = 0.05
 	}
 	SubShader
     {
-        Tags { "RenderPipeline"="UniversalPipeline" "Queue"="Transparent" }
+        Tags { "RenderPipeline"="UniversalPipeline" "RenderType" = "Transparent" "Queue"="Transparent" }
 
         Pass
         {
@@ -34,6 +36,10 @@ Shader "ShadowExtend/PlannerShadow"
             
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             
+			float _GroundHeight;
+            float4 _ShadowColor;
+            float _ShadowFalloff;
+            
             struct Attributes 
             {
                 float4 positionOS : POSITION;
@@ -56,7 +62,7 @@ Shader "ShadowExtend/PlannerShadow"
 		        float3 lightDir = normalize(GetMainLight().direction);
 
 		        //阴影的世界空间坐标（低于地面的部分不做改变）
-		        shadowPos.y = min(worldPos.y , 0);
+		        shadowPos.y = min(worldPos.y , _GroundHeight);
 		        shadowPos.xz = worldPos .xz - lightDir.xz * max(0 , worldPos .y) / lightDir.y; 
 
 		        return shadowPos;
@@ -74,10 +80,10 @@ Shader "ShadowExtend/PlannerShadow"
 		        //得到中心点世界坐标
 		        float3 center =float3( unity_ObjectToWorld[0].w , 0 , unity_ObjectToWorld[2].w);
 		        //计算阴影衰减
-		        float falloff = 1-saturate(distance(shadowPos , center) * 1);
+		        float falloff = 1-saturate(distance(shadowPos , center) * _ShadowFalloff);
 
 		        //阴影颜色
-		        OUT.color = unity_ShadowColor; 
+		        OUT.color = _ShadowColor; 
 		        OUT.color.a *= falloff;
                 
                 return OUT;
