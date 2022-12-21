@@ -16,7 +16,7 @@ public class PlannarShadowRF : ScriptableRendererFeature
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             CommandBuffer cmd = CommandBufferPool.Get(name: "PlannarShadow");
-            Camera camera = renderingData.cameraData.camera;
+            
             
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
